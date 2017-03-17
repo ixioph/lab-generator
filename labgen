@@ -1,0 +1,84 @@
+#!/bin/bash
+#
+#Author: Willie Cooley
+#Description: Takes N number of arguments, the first argument will be the
+#     file folder created in the current directory, and any subsequent
+#     arguments will represent the extensions of the files within the folder.
+
+main() {
+  #verify inputs
+  if [ "$#" -eq 0 ]; then
+    echo "No Folder name specified."
+    echo "Enter 'help' as the argument to view functionality"
+    echo "Aborting."
+    exit 3
+  elif [ -d "$1" ]; then
+    echo "A directory with that name already exists!"
+    echo "Aborting."
+    exit 3
+  elif [ $1 = "help" ] || [ $1 = "--help" ] || [ $1 = "-h" ] || [ $1 = "-help" ]; then
+    printHelp
+    exit 4
+  elif [ "$#" -eq 1 ]; then
+    echo "No extensions specified. Using default."
+    args=("$1" "h" "cpp" "c");
+  else
+    args=("$@");
+  fi
+
+  #make the directory
+  mkdir $1
+
+  #create files for each extension
+  for ext in "${args[@]:1}"; do
+    touch $1/lab.$ext
+  done
+
+  #generate the .tex file
+  genTex $args
+
+  #echo "${args[@]}"
+
+}
+printHelp() {
+  echo "
+NAME
+    labgen - generate a new lab directory and populate it
+
+USAGE
+    ./labgen <folderName> <ext1> <ext2> <ext3> ...
+
+SUMMARY
+    This script creates a directory named <folderName> in the current
+    working directory and creates N (number of arguments) files in the created
+    directory with the specified file extensions with a file named 'lab',
+    alongside a barebones LaTeX document supporting them.
+
+
+Report bugs to:
+Willie Cooley @ github.com/ixioph/ "
+}
+genTex() {
+  echo "Generating LaTeX File..." &&
+  echo "\documentclass{ffslides}" > $1/lab.tex
+  echo "\usepackage{fancyvrb}" >> $1/lab.tex
+  echo "\begin{document}" >> $1/lab.tex
+  echo "\normalpage{INTRO PAGE TITLE}{" >> $1/lab.tex
+  echo "SampleText SampleText SampleText" >> $1/lab.tex
+  echo "SampleText SampleText SampleText" >> $1/lab.tex
+  echo "}" >> $1/lab.tex
+
+  for ext in "${args[@]:1}"; do
+    echo "" >> $1/lab.tex
+    echo "\normalpage{Lab $ext File}{" >> $1/lab.tex
+    echo "SampleText SampleText SampleText" >> $1/lab.tex
+    echo "SampleText SampleText SampleText" >> $1/lab.tex
+    echo "\VerbatimInput{lab.$ext}" >> $1/lab.tex
+    echo "}" >> $1/lab.tex
+    echo "%\putfig{.25}{.5}{.5}{lab$ext}" >> $1/lab.tex
+  done
+  echo "" >> $1/lab.tex
+  echo "\end{document}" >> $1/lab.tex &&
+  echo "LaTeX File successfully generated at $1/lab.tex!"
+}
+main $@
