@@ -32,6 +32,12 @@ main() {
   #create files for each extension
   for ext in "${args[@]:1}"; do
     touch $1/lab.$ext
+    if [ $ext = "c" ] || [ $ext = "cpp" ]; then
+      echo -n "//" >> $1/lab.$ext;
+    else
+      echo -n "#" >> $1/lab.$ext;
+    fi
+    echo " lab.$ext " >> $1/lab.$ext;
   done
 
   #generate the .tex file
